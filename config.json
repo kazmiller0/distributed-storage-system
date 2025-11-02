@@ -1,0 +1,12 @@
+{
+    "num_clients": 2,
+    "num_storagers": 3,
+    "ads_mode": "MerkleTree",
+    "manager_addr": "http://[::1]:50051",
+    "storager_addrs": [
+        "http://[::1]:50052",
+        "http://[::1]:50053",
+        "http://[::1]:50054"
+    ],
+    "client_addrs": []
+}

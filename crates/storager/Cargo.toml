@@ -1,0 +1,11 @@
+[package]
+name = "storager"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+common = { path = "../common" }
+ads = { path = "../ads" }
+tokio = { workspace = true }
+tonic = { workspace = true }
+anyhow = { workspace = true }

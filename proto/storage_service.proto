@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package storage_service;
+
+// Manager Service - handles client requests and coordinates with storagers
+service ManagerService {
+  // Add keyword-fid pairs to the system
+  rpc Add(AddRequest) returns (AddResponse);
+  // Query files by keyword or boolean function
+  rpc Query(QueryRequest) returns (QueryResponse);
+  // Delete keyword-fid pairs from the system
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  // Update keyword-fid pairs in the system
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+}
+
+// Storager Service - handles actual data storage with ADS
+service StoragerService {
+  // Add a keyword-fid pair to the ADS
+  rpc Add(StoragerAddRequest) returns (StoragerAddResponse);
+  // Query a keyword in the ADS
+  rpc Query(StoragerQueryRequest) returns (StoragerQueryResponse);
+  // Delete a keyword-fid pair from the ADS
+  rpc Delete(StoragerDeleteRequest) returns (StoragerDeleteResponse);
+}
+
+// Manager Add Request
+message AddRequest {
+  string fid = 1;
+  repeated string keywords = 2;
+}
+
+message AddResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Manager Query Request
+message QueryRequest {
+  oneof query_type {
+    string keyword = 1;
+    string boolean_function = 2;
+  }
+}
+
+message QueryResponse {
+  repeated string fids = 1;
+  bytes proof = 2;
+  bytes root_hash = 3;
+  bool verified = 4;
+}
+
+// Manager Delete Request
+message DeleteRequest {
+  string fid = 1;
+  repeated string keywords = 2;
+}
+
+message DeleteResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Manager Update Request
+message UpdateRequest {
+  string fid = 1;
+  repeated string old_keywords = 2;
+  repeated string new_keywords = 3;
+}
+
+message UpdateResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Storager Add Request
+message StoragerAddRequest {
+  string keyword = 1;
+  string fid = 2;
+}
+
+message StoragerAddResponse {
+  bytes proof = 1;
+  bytes root_hash = 2;
+}
+
+// Storager Query Request
+message StoragerQueryRequest {
+  string keyword = 1;
+}
+
+message StoragerQueryResponse {
+  repeated string fids = 1;
+  bytes proof = 2;
+}
+
+// Storager Delete Request
+message StoragerDeleteRequest {
+  string keyword = 1;
+  string fid = 2;
+}
+
+message StoragerDeleteResponse {
+  bytes proof = 1;
+  bytes root_hash = 2;
+}
