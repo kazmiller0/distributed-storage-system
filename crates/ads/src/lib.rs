@@ -1,15 +1,41 @@
-pub mod merkle_tree;
-pub mod patricia_trie;
+//! ESA (Efficient Set Accumulator) Library
+//! 
+//! 这个库提供了多种认证数据结构 (Authenticated Data Structures) 的实现
+//! 
+//! ## 当前实现
+//! - **CryptoAccumulator**: 基于 BLS12-381 的密码学累加器
+//! 
+//! ## 未来扩展
+//! 可以添加其他 ADS 实现，例如:
+//! - Merkle Tree
+//! - Patricia Trie
+//! - Vector Commitment
+//! 等等
 
-/// A trait for Authenticated Data Structures (ADS).
-/// This defines a common interface for different ADS implementations.
-pub trait AuthenticatedDataStructure<T> {
-    /// Insert data into the structure and get a commitment (e.g., root hash).
-    fn commit(&mut self, data: &[T]) -> anyhow::Result<[u8; 32]>;
+#[macro_use]
+extern crate lazy_static;
+#[macro_use]
+extern crate log;
 
-    /// Generate a proof of inclusion for a specific piece of data.
-    fn prove(&self, element: &T) -> anyhow::Result<Vec<[u8; 32]>>;
+// ========================================
+// Common utilities (shared across all ADS)
+// ========================================
 
-    /// Verify a proof of inclusion against a commitment.
-    fn verify(commitment: &[u8; 32], element: &T, proof: &[[u8; 32]]) -> bool;
-}
+/// Digest utilities - 通用摘要工具
+pub mod digest;
+pub use digest::*;
+
+/// Set operations - 通用集合操作
+pub mod set;
+pub use set::*;
+
+// ========================================
+// ADS Implementations
+// ========================================
+
+/// Cryptographic Accumulator based on BLS12-381
+pub mod crypto_accumulator;
+
+// Re-export commonly used types
+pub use crypto_accumulator::DynamicAccumulator;
+pub use crypto_accumulator::DigestSet;

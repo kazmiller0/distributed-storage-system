@@ -1,152 +1,35 @@
-use ads::merkle_tree::MerkleTree;
-use ads::patricia_trie::PatriciaTrie;
+//! Storager 服务实现
+//!
+//! 存储节点负责：
+//! - 管理特定分片的数据
+//! - 维护认证数据结构 (ADS)
+//! - 生成和验证密码学证明
+
 use common::rpc::{
     storager_service_server::{StoragerService, StoragerServiceServer},
     StoragerAddRequest, StoragerAddResponse, StoragerDeleteRequest, StoragerDeleteResponse,
     StoragerQueryRequest, StoragerQueryResponse,
 };
-use common::{AdsMode, RootHash};
-use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use tonic::{transport::Server, Request, Response, Status};
 
-// Trait for ADS operations
-trait AdsOperations: Send + Sync {
-    fn add(&mut self, keyword: &str, fid: &str) -> (Vec<u8>, RootHash);
-    fn query(&self, keyword: &str) -> (Vec<String>, Vec<u8>);
-    fn delete(&mut self, keyword: &str, fid: &str) -> (Vec<u8>, RootHash);
-}
+mod ads_trait;
+mod ads;
 
-// Wrapper for MerkleTree
-struct MerkleTreeAds {
-    tree: MerkleTree,
-    data: HashMap<String, Vec<String>>, // keyword -> list of fids
-}
+use ads_trait::AdsOperations;
+use ads::CryptoAccumulatorAds;
 
-impl MerkleTreeAds {
-    fn new() -> Self {
-        MerkleTreeAds {
-            tree: MerkleTree::new(),
-            data: HashMap::new(),
-        }
-    }
-}
-
-impl AdsOperations for MerkleTreeAds {
-    fn add(&mut self, keyword: &str, fid: &str) -> (Vec<u8>, RootHash) {
-        self.data
-            .entry(keyword.to_string())
-            .or_insert_with(Vec::new)
-            .push(fid.to_string());
-
-        // Update Merkle tree
-        let data = format!("{}:{}", keyword, fid);
-        self.tree.insert(data.as_bytes());
-
-        let proof = self.tree.get_proof(data.as_bytes());
-        let root_hash = self.tree.root_hash();
-
-        (proof, root_hash)
-    }
-
-    fn query(&self, keyword: &str) -> (Vec<String>, Vec<u8>) {
-        let fids = self.data.get(keyword).cloned().unwrap_or_default();
-        let proof = if !fids.is_empty() {
-            let data = format!("{}:{}", keyword, fids[0]);
-            self.tree.get_proof(data.as_bytes())
-        } else {
-            vec![]
-        };
-        (fids, proof)
-    }
-
-    fn delete(&mut self, keyword: &str, fid: &str) -> (Vec<u8>, RootHash) {
-        if let Some(fids) = self.data.get_mut(keyword) {
-            fids.retain(|f| f != fid);
-            if fids.is_empty() {
-                self.data.remove(keyword);
-            }
-        }
-
-        // Update Merkle tree
-        let data = format!("{}:{}", keyword, fid);
-        self.tree.delete(data.as_bytes());
-
-        let proof = self.tree.get_proof(data.as_bytes());
-        let root_hash = self.tree.root_hash();
-
-        (proof, root_hash)
-    }
-}
-
-// Wrapper for PatriciaTrie
-struct PatriciaTrieAds {
-    trie: PatriciaTrie,
-    data: HashMap<String, Vec<String>>, // keyword -> list of fids
-}
-
-impl PatriciaTrieAds {
-    fn new() -> Self {
-        PatriciaTrieAds {
-            trie: PatriciaTrie::new(),
-            data: HashMap::new(),
-        }
-    }
-}
-
-impl AdsOperations for PatriciaTrieAds {
-    fn add(&mut self, keyword: &str, fid: &str) -> (Vec<u8>, RootHash) {
-        self.data
-            .entry(keyword.to_string())
-            .or_insert_with(Vec::new)
-            .push(fid.to_string());
-
-        // Update Patricia trie
-        let value = self.data.get(keyword).unwrap().join(",");
-        self.trie.insert(keyword.as_bytes(), value.as_bytes());
-
-        let proof = self.trie.get_proof(keyword.as_bytes());
-        let root_hash = self.trie.root_hash();
-
-        (proof, root_hash)
-    }
-
-    fn query(&self, keyword: &str) -> (Vec<String>, Vec<u8>) {
-        let fids = self.data.get(keyword).cloned().unwrap_or_default();
-        let proof = self.trie.get_proof(keyword.as_bytes());
-        (fids, proof)
-    }
-
-    fn delete(&mut self, keyword: &str, fid: &str) -> (Vec<u8>, RootHash) {
-        if let Some(fids) = self.data.get_mut(keyword) {
-            fids.retain(|f| f != fid);
-            if fids.is_empty() {
-                self.data.remove(keyword);
-                self.trie.delete(keyword.as_bytes());
-            } else {
-                let value = fids.join(",");
-                self.trie.insert(keyword.as_bytes(), value.as_bytes());
-            }
-        }
-
-        let proof = self.trie.get_proof(keyword.as_bytes());
-        let root_hash = self.trie.root_hash();
-
-        (proof, root_hash)
-    }
-}
-
-// Storager structure
+/// Storager 结构
+///
+/// 负责管理单个存储节点的 ADS 实例
 pub struct Storager {
     ads: Arc<RwLock<Box<dyn AdsOperations>>>,
 }
 
 impl Storager {
-    pub fn new(mode: AdsMode) -> Self {
-        let ads: Box<dyn AdsOperations> = match mode {
-            AdsMode::MerkleTree => Box::new(MerkleTreeAds::new()),
-            AdsMode::PatriciaTrie => Box::new(PatriciaTrieAds::new()),
-        };
+    /// 创建新的 Storager 实例（使用密码学累加器）
+    pub fn new() -> Self {
+        let ads: Box<dyn AdsOperations> = Box::new(CryptoAccumulatorAds::new());
 
         Storager {
             ads: Arc::new(RwLock::new(ads)),
@@ -214,10 +97,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let addr = format!("[::1]:{}", port).parse()?;
 
-    // TODO: Load from config
-    let storager = Storager::new(AdsMode::MerkleTree);
+    let storager = Storager::new();
 
-    println!("Storager server listening on {}", addr);
+    println!("Storager server listening on {} (CryptoAccumulator)", addr);
 
     Server::builder()
         .add_service(StoragerServiceServer::new(storager))

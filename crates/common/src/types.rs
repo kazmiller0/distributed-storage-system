@@ -18,8 +18,7 @@ pub struct Proof {
 // ADS Mode - type of authenticated data structure
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AdsMode {
-    MerkleTree,
-    PatriciaTrie,
+    CryptoAccumulator, // 密码学累加器 (BLS12-381)
 }
 
 // Configuration for the distributed storage system

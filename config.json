@@ -1,12 +1,10 @@
 {
-    "num_clients": 2,
-    "num_storagers": 3,
-    "ads_mode": "MerkleTree",
+    "num_clients": 1,
+    "num_storagers": 1,
+    "ads_mode": "CryptoAccumulator",
     "manager_addr": "http://[::1]:50051",
     "storager_addrs": [
-        "http://[::1]:50052",
-        "http://[::1]:50053",
-        "http://[::1]:50054"
+        "http://[::1]:50052"
     ],
     "client_addrs": []
 }

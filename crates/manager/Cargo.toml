@@ -5,6 +5,11 @@ edition = "2021"
 
 [dependencies]
 common = { path = "../common" }
+esa_rust = { path = "../ads" }
 tokio = { workspace = true }
 tonic = { workspace = true }
 anyhow = { workspace = true }
+ark-serialize = "0.2"
+ark-ec = "0.2"
+ark-bls12-381 = "0.2"
+ark-ff = "0.2"
