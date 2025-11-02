@@ -423,14 +423,14 @@ distributed-storage-system/
 
 ### 关键文件说明
 
-| 文件/目录 | 说明 |
-|-----------|------|
-| `proto/storage_service.proto` | gRPC 服务定义，包含所有 RPC 接口 |
-| `crates/ads/` | 独立的密码学累加器库，可单独使用 |
-| `crates/storager/src/ads/` | Storager 的 ADS 适配层 |
-| `crates/manager/src/main.rs` | Manager 核心逻辑（路由+验证） |
-| `config.json` | 系统配置（节点数量、地址、ADS 模式） |
-| `start.sh` / `stop.sh` | 服务管理脚本 |
+| 文件/目录                     | 说明                                 |
+| ----------------------------- | ------------------------------------ |
+| `proto/storage_service.proto` | gRPC 服务定义，包含所有 RPC 接口     |
+| `crates/ads/`                 | 独立的密码学累加器库，可单独使用     |
+| `crates/storager/src/ads/`    | Storager 的 ADS 适配层               |
+| `crates/manager/src/main.rs`  | Manager 核心逻辑（路由+验证）        |
+| `config.json`                 | 系统配置（节点数量、地址、ADS 模式） |
+| `start.sh` / `stop.sh`        | 服务管理脚本                         |
 
 ## 🔌 RPC 接口
 
@@ -525,13 +525,13 @@ Query 操作:
 
 ### 配置项说明
 
-| 配置项 | 类型 | 说明 |
-|--------|------|------|
-| `num_clients` | number | 客户端数量（当前版本支持 1） |
-| `num_storagers` | number | Storager 节点数量（支持 1-N） |
-| `ads_mode` | string | ADS 模式，当前仅支持 `"CryptoAccumulator"` |
-| `manager_addr` | string | Manager 监听地址（IPv6） |
-| `storager_addrs` | array | Storager 节点地址列表 |
+| 配置项           | 类型   | 说明                                       |
+| ---------------- | ------ | ------------------------------------------ |
+| `num_clients`    | number | 客户端数量（当前版本支持 1）               |
+| `num_storagers`  | number | Storager 节点数量（支持 1-N）              |
+| `ads_mode`       | string | ADS 模式，当前仅支持 `"CryptoAccumulator"` |
+| `manager_addr`   | string | Manager 监听地址（IPv6）                   |
+| `storager_addrs` | array  | Storager 节点地址列表                      |
 
 ### 多节点配置示例
 
@@ -615,14 +615,14 @@ cargo flamegraph --bin storager
 
 基于测试环境的性能数据：
 
-| 操作 | 延迟 | 吞吐量 |
-|------|------|--------|
+| 操作       | 延迟   | 吞吐量     |
+| ---------- | ------ | ---------- |
 | Add (单个) | < 10ms | ~100 ops/s |
-| Query | < 5ms | ~200 ops/s |
-| Update | < 15ms | ~66 ops/s |
-| Delete | < 10ms | ~100 ops/s |
-| 证明生成 | < 5ms | - |
-| 证明验证 | < 1ms | - |
+| Query      | < 5ms  | ~200 ops/s |
+| Update     | < 15ms | ~66 ops/s  |
+| Delete     | < 10ms | ~100 ops/s |
+| 证明生成   | < 5ms  | -          |
+| 证明验证   | < 1ms  | -          |
 
 *测试环境: MacBook Air M1, 8GB RAM*
 

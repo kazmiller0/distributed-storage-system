@@ -75,7 +75,7 @@ mod tests {
         let config = initialize(
             2,
             3,
-            AdsMode::MerkleTree,
+            AdsMode::CryptoAccumulator,
             "http://[::1]:50051".to_string(),
             vec![
                 "http://[::1]:50052".to_string(),

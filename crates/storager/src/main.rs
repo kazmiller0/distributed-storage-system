@@ -13,11 +13,11 @@ use common::rpc::{
 use std::sync::{Arc, RwLock};
 use tonic::{transport::Server, Request, Response, Status};
 
-mod ads_trait;
 mod ads;
+mod ads_trait;
 
-use ads_trait::AdsOperations;
 use ads::CryptoAccumulatorAds;
+use ads_trait::AdsOperations;
 
 /// Storager 结构
 ///

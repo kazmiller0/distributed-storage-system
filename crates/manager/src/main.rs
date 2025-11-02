@@ -1,3 +1,5 @@
+use ark_bls12_381::G1Affine;
+use ark_serialize::CanonicalDeserialize;
 use common::rpc::{
     manager_service_server::{ManagerService, ManagerServiceServer},
     storager_service_client::StoragerServiceClient,
@@ -8,8 +10,6 @@ use common::{AdsMode, RootHash};
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use tonic::{transport::Server, Request, Response, Status};
-use ark_serialize::CanonicalDeserialize;
-use ark_bls12_381::G1Affine;
 
 // Manager structure
 pub struct Manager {
@@ -51,25 +51,25 @@ impl Manager {
                 if proof.is_empty() {
                     return false;
                 }
-                
+
                 // 最后一个字节是 storager 端的验证结果
                 let storager_verified = proof.last() == Some(&1);
-                
+
                 if !storager_verified {
                     println!("Storager verification failed");
                     return false;
                 }
-                
+
                 // 验证证明的结构完整性
                 // AddProof/DeleteProof 格式: [old_acc(96字节) | new_acc(96字节) | element(8字节) | verification_byte(1字节)]
                 // MembershipProof 格式: [witness(96字节) | element(8字节) | acc_value(96字节) | verification_byte(1字节)]
-                
+
                 let min_size = 96 + 8 + 1; // 最小证明大小
                 if proof.len() < min_size {
                     println!("Proof too small: {} bytes", proof.len());
                     return false;
                 }
-                
+
                 // 尝试反序列化第一个椭圆曲线点来验证格式正确性
                 match G1Affine::deserialize(&proof[..96]) {
                     Ok(_) => {
@@ -317,7 +317,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let manager = Manager::new(storager_addrs, AdsMode::CryptoAccumulator);
 
-    println!("Manager server listening on {} (ADS Mode: CryptoAccumulator)", addr);
+    println!(
+        "Manager server listening on {} (ADS Mode: CryptoAccumulator)",
+        addr
+    );
 
     Server::builder()
         .add_service(ManagerServiceServer::new(manager))
