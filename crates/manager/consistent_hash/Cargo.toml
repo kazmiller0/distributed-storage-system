@@ -1,0 +1,13 @@
+[package]
+name = "consistent_hash"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A standalone consistent hashing implementation with virtual nodes"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+rand = "0.8"

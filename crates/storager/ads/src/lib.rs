@@ -36,6 +36,9 @@ pub use set::*;
 /// Cryptographic Accumulator based on BLS12-381
 pub mod crypto_accumulator;
 
+/// Merkle Patricia Trie implementation
+pub mod mpt;
+
 // Re-export commonly used types
 pub use crypto_accumulator::DigestSet;
 pub use crypto_accumulator::DynamicAccumulator;

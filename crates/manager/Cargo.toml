@@ -3,9 +3,17 @@ name = "manager"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "manager"
+path = "src/main.rs"
+
+[lib]
+name = "manager"
+path = "src/lib.rs"
+
 [dependencies]
 common = { path = "../common" }
-esa_rust = { path = "../ads" }
+consistent_hash = { path = "./consistent_hash" }
 tokio = { workspace = true }
 tonic = { workspace = true }
 anyhow = { workspace = true }

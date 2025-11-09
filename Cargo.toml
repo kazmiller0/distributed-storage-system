@@ -5,7 +5,8 @@ members = [
     "crates/manager",
     "crates/storager",
     "crates/common",
-    "crates/ads",
+    "crates/storager/ads",
+    "crates/manager/consistent_hash",
 ]
 
 [package]
