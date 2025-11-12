@@ -9,7 +9,6 @@
 /// 4. 实现 AdsOperations trait 的三个方法
 /// 5. 在 mod.rs 中注册此模块
 /// 6. 在 storager.rs 中添加构造函数
-
 use crate::ads_trait::AdsOperations;
 use common::RootHash;
 
@@ -39,7 +38,7 @@ impl AdsOperations for NewAds {
         // 1. 更新内部数据结构
         // 2. 生成证明
         // 3. 返回 (证明, 新的根哈希)
-        
+
         unimplemented!("Add operation not implemented")
     }
 
@@ -51,7 +50,7 @@ impl AdsOperations for NewAds {
         // 1. 查找 keyword 对应的所有 fid
         // 2. 生成成员资格证明
         // 3. 返回 (fid列表, 证明)
-        
+
         unimplemented!("Query operation not implemented")
     }
 
@@ -63,7 +62,7 @@ impl AdsOperations for NewAds {
         // 1. 从数据结构中移除元素
         // 2. 生成删除证明
         // 3. 返回 (证明, 新的根哈希)
-        
+
         unimplemented!("Delete operation not implemented")
     }
 }

@@ -320,7 +320,8 @@ impl MPT {
                 return Ok((old_value_str, is_change));
             } else {
                 // 辅助索引:检查是否需要删除整个键(当值为空时)
-                let need_delete = final_value.is_empty() || String::from_utf8_lossy(&final_value).trim().is_empty();
+                let need_delete = final_value.is_empty()
+                    || String::from_utf8_lossy(&final_value).trim().is_empty();
                 return Ok((String::new(), need_delete));
             }
         }
@@ -522,14 +523,15 @@ impl MPT {
                 }
 
                 let had_value = !old_value_str.is_empty();
-                
+
                 // 在移动final_value之前计算need_delete
                 let need_delete = if !is_primary {
-                    final_value.is_empty() || String::from_utf8_lossy(&final_value).trim().is_empty()
+                    final_value.is_empty()
+                        || String::from_utf8_lossy(&final_value).trim().is_empty()
                 } else {
                     false
                 };
-                
+
                 child_guard.value = Some(final_value);
                 child_guard.is_dirty = true;
                 child_guard.update_hash();
@@ -1210,12 +1212,12 @@ impl MPT {
             if let Some(data) = db.get(&child_hash_clone)? {
                 let short_node = ShortNode::deserialize(&data)?;
                 let short_node_arc = Arc::new(RwLock::new(short_node));
-                
+
                 // 将加载的节点更新到父节点
                 if let Ok(mut write_guard) = full_node.write() {
                     write_guard.children[index] = Some(short_node_arc.clone());
                 }
-                
+
                 short_node_arc
             } else {
                 // 数据库中找不到节点
@@ -1283,12 +1285,12 @@ impl MPT {
                 if let Some(data) = db.get(&next_hash)? {
                     let full_node = FullNode::deserialize(&data)?;
                     let full_node_arc = Arc::new(RwLock::new(full_node));
-                    
+
                     // 更新Extension节点的next_node
                     if let Ok(mut write_guard) = child_node.write() {
                         write_guard.next_node = Some(full_node_arc.clone());
                     }
-                    
+
                     Some(full_node_arc)
                 } else {
                     None
@@ -1296,13 +1298,13 @@ impl MPT {
             } else {
                 None
             };
-            
+
             if let Some(next_node) = next_node_opt {
                 // 重新获取child_guard(如果之前释放了的话)
                 let child_guard = child_node
                     .read()
                     .map_err(|_| MPTError::LockError("Failed to read ShortNode".to_string()))?;
-                
+
                 // 检查 Extension node 的后缀
                 let ext_suffix: Vec<u8> = child_guard
                     .suffix
@@ -1402,7 +1404,7 @@ impl MPT {
     }
 
     /// 从数据库加载 MPT
-    /// 
+    ///
     /// 根据给定的根哈希从数据库中恢复整个 MPT 树结构
     pub fn load_from_db(
         root_hash: &[u8; 32],
@@ -1411,7 +1413,7 @@ impl MPT {
     ) -> Result<Self, MPTError> {
         // 创建新的 MPT 实例
         let mut mpt = MPT::new(cache);
-        
+
         // 设置根哈希
         mpt.root_hash = *root_hash;
 
@@ -1426,7 +1428,7 @@ impl MPT {
     }
 
     /// 完整持久化 MPT 到数据库
-    /// 
+    ///
     /// 保存 MPT 元数据和所有节点数据
     pub fn persist_to_db(&mut self, db: &mut dyn Database) -> Result<(), MPTError> {
         // 首先执行 batch_fix 确保所有节点哈希是最新的
@@ -1452,12 +1454,13 @@ impl MPT {
         // 读取根哈希
         let root_hash_key = b"mpt:root_hash";
         let root_hash_data = db.get(root_hash_key)?;
-        
+
         if let Some(data) = root_hash_data {
             if data.len() != 32 {
-                return Err(MPTError::InvalidData(
-                    format!("Invalid root hash length: {} (expected 32)", data.len()),
-                ));
+                return Err(MPTError::InvalidData(format!(
+                    "Invalid root hash length: {} (expected 32)",
+                    data.len()
+                )));
             }
 
             let mut root_hash = [0u8; 32];
@@ -1572,39 +1575,33 @@ impl MPT {
 
         Ok(())
     }
-    
+
     /// 递归保存整个树到数据库
-    fn save_tree_to_db(
-        node: Arc<RwLock<FullNode>>,
-        db: &mut dyn Database,
-    ) -> Result<(), MPTError> {
+    fn save_tree_to_db(node: Arc<RwLock<FullNode>>, db: &mut dyn Database) -> Result<(), MPTError> {
         // 保存当前FullNode
         let (node_hash, serialized, children_to_save) = {
             let guard = node
                 .read()
                 .map_err(|_| MPTError::LockError("Failed to read FullNode".to_string()))?;
-            
+
             let node_hash = guard.node_hash;
             let serialized = guard.serialize()?;
-            let children: Vec<Arc<RwLock<ShortNode>>> = guard
-                .children
-                .iter()
-                .filter_map(|c| c.clone())
-                .collect();
-            
+            let children: Vec<Arc<RwLock<ShortNode>>> =
+                guard.children.iter().filter_map(|c| c.clone()).collect();
+
             (node_hash, serialized, children)
         };
-        
+
         db.put(&node_hash, &serialized)?;
-        
+
         // 递归保存所有子节点
         for child in children_to_save {
             Self::save_short_node_to_db(child, db)?;
         }
-        
+
         Ok(())
     }
-    
+
     /// 递归保存ShortNode及其子树到数据库
     fn save_short_node_to_db(
         node: Arc<RwLock<ShortNode>>,
@@ -1614,17 +1611,17 @@ impl MPT {
             let guard = node
                 .read()
                 .map_err(|_| MPTError::LockError("Failed to read ShortNode".to_string()))?;
-            
+
             (guard.node_hash, guard.serialize()?, guard.next_node.clone())
         };
-        
+
         db.put(&node_hash, &serialized)?;
-        
+
         // 如果有next_node (Extension节点),递归保存
         if let Some(next) = next_node {
             Self::save_tree_to_db(next, db)?;
         }
-        
+
         Ok(())
     }
 

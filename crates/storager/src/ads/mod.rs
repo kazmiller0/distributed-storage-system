@@ -11,7 +11,6 @@
 /// 3. 在此文件中添加 `pub mod your_ads;`
 /// 4. 在此文件中添加 `pub use your_ads::YourAds;`
 /// 5. 在 src/storager.rs 中根据配置选择使用哪个 ADS
-
 pub mod crypto_accumulator;
 
 // 未来的 ADS 实现示例：

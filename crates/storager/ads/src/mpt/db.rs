@@ -1,6 +1,6 @@
 use super::error::MPTError;
 use super::node::Database;
-use rocksdb::{DB, Options};
+use rocksdb::{Options, DB};
 use std::path::Path;
 
 pub struct RocksDbAdapter {
@@ -11,8 +11,7 @@ impl RocksDbAdapter {
     pub fn open(path: &Path) -> Result<Self, MPTError> {
         let mut opts = Options::default();
         opts.create_if_missing(true);
-        let db = DB::open(&opts, path)
-            .map_err(|e| MPTError::DatabaseError(e.to_string()))?;
+        let db = DB::open(&opts, path).map_err(|e| MPTError::DatabaseError(e.to_string()))?;
         Ok(Self { db })
     }
 }

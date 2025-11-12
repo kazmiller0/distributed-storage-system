@@ -1,9 +1,8 @@
-/// MPT ADS 集成测试
-/// 
-/// 测试 MPT 作为 ADS（Authenticated Data Structure）的完整功能
-
-use esa_rust::mpt::{MPT, MPTError};
 use esa_rust::mpt::node::Database;
+/// MPT ADS 集成测试
+///
+/// 测试 MPT 作为 ADS（Authenticated Data Structure）的完整功能
+use esa_rust::mpt::{MPTError, MPT};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
@@ -27,7 +26,10 @@ impl Database for MemoryDB {
     }
 
     fn put(&mut self, key: &[u8], value: &[u8]) -> Result<(), MPTError> {
-        self.data.lock().unwrap().insert(key.to_vec(), value.to_vec());
+        self.data
+            .lock()
+            .unwrap()
+            .insert(key.to_vec(), value.to_vec());
         Ok(())
     }
 
@@ -40,7 +42,7 @@ impl Database for MemoryDB {
 #[test]
 fn test_mpt_basic_insert_and_query() {
     println!("\n=== 测试基本插入和查询 ===");
-    
+
     let mut db = MemoryDB::new();
     let mut mpt = MPT::new(None);
 
@@ -76,7 +78,7 @@ fn test_mpt_basic_insert_and_query() {
 #[test]
 fn test_mpt_update_and_delete() {
     println!("\n=== 测试更新和删除 ===");
-    
+
     let mut db = MemoryDB::new();
     let mut mpt = MPT::new(None);
 
@@ -110,7 +112,7 @@ fn test_mpt_update_and_delete() {
 #[test]
 fn test_mpt_multiple_keys() {
     println!("\n=== 测试多个键 ===");
-    
+
     let mut db = MemoryDB::new();
     let mut mpt = MPT::new(None);
 
@@ -133,7 +135,7 @@ fn test_mpt_multiple_keys() {
     for (key, expected_value) in &keys {
         let (value, proof) = mpt.query_by_key(key, &mut db).unwrap();
         assert_eq!(&value, expected_value);
-        
+
         // 验证证明
         let is_valid = mpt.verify_query_result(&value, &proof);
         assert!(is_valid);
@@ -146,9 +148,9 @@ fn test_mpt_multiple_keys() {
 #[test]
 fn test_mpt_persist_and_restore() {
     println!("\n=== 测试持久化和恢复 ===");
-    
+
     let mut db = MemoryDB::new();
-    
+
     // 创建并填充 MPT
     let mut mpt1 = MPT::new(None);
     let kv1 = esa_rust::mpt::KVPair::new("test1".to_string(), "data1".to_string());
@@ -174,7 +176,7 @@ fn test_mpt_persist_and_restore() {
 
     let restored_root_hash = mpt2.get_root_hash();
     println!("恢复的根哈希: {:x?}", &restored_root_hash[..8]);
-    
+
     // 验证根哈希一致
     assert_eq!(root_hash, restored_root_hash);
     println!("✓ 根哈希一致");
@@ -192,7 +194,7 @@ fn test_mpt_persist_and_restore() {
 #[test]
 fn test_mpt_proof_verification() {
     println!("\n=== 测试证明验证 ===");
-    
+
     let mut db = MemoryDB::new();
     let mut mpt = MPT::new(None);
 
@@ -209,10 +211,10 @@ fn test_mpt_proof_verification() {
     for i in 0..10 {
         let key = format!("key{}", i);
         let expected_value = format!("value{}", i);
-        
+
         let (value, proof) = mpt.query_by_key(&key, &mut db).unwrap();
         assert_eq!(value, expected_value);
-        
+
         // 验证证明
         let is_valid = mpt.verify_query_result(&value, &proof);
         assert!(is_valid);
@@ -228,16 +230,16 @@ fn test_mpt_proof_verification() {
 #[test]
 fn test_mpt_concurrent_operations() {
     println!("\n=== 测试并发安全性 ===");
-    
+
     let db = MemoryDB::new();
     let mut mpt = MPT::new(None);
-    
+
     // 测试基本的线程安全性
     // 注意：由于 Database trait 需要 mut，实际并发需要特殊处理
     // 这里主要测试数据结构的基本并发安全性
-    
+
     let mut db_clone = db.clone();
-    
+
     // 插入数据
     for i in 0..20 {
         let key = format!("concurrent{}", i);
@@ -260,7 +262,7 @@ fn test_mpt_concurrent_operations() {
 #[test]
 fn test_mpt_secondary_index() {
     println!("\n=== 测试辅助索引（非主键索引）===");
-    
+
     let mut db = MemoryDB::new();
     let mut mpt = MPT::new(None);
 
@@ -276,7 +278,7 @@ fn test_mpt_secondary_index() {
     // 查询辅助索引
     let (value, _) = mpt.query_by_key("color:red", &mut db).unwrap();
     println!("✓ 查询辅助索引 color:red: {}", value);
-    
+
     // 应该包含两个值（逗号分隔）
     assert!(value.contains("apple"));
     assert!(value.contains("cherry"));
