@@ -1,5 +1,54 @@
 # Rust
-/target
+# Rust 编译产物
+/target/
+**/target/
+Cargo.lock
+
+# IDE 配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 日志文件
+*.log
+logs/*.log
+!logs/.gitkeep
+
+# 测试数据
+/data/*
+!data/.gitkeep
+
+# 临时文件
+*.tmp
+*.bak
+.*.swp
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 编译缓存
+*.d
+*.rlib
+*.rmeta
+
+# 调试文件
+*.pdb
+*.dSYM/
+
+# 性能分析
+*.profdata
+perf.data*
+
+# 文档构建产物
+/docs/target/
+
+# 环境配置
+.env
+.env.local
 **/Cargo.lock
 **/*.rs.bk
 *.pdb
