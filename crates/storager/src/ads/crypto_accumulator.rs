@@ -3,7 +3,7 @@
 //! 基于 BLS12-381 椭圆曲线的密码学累加器
 //! 支持恒定大小的成员资格证明
 
-use crate::ads_trait::AdsOperations;
+use super::AdsOperations;
 use ark_serialize::CanonicalSerialize;
 use common::RootHash;
 use esa_rust::crypto_accumulator::acc::dynamic_accumulator::{DynamicAccumulator, QueryResult};
@@ -81,9 +81,30 @@ impl AdsOperations for CryptoAccumulatorAds {
 
         let old_acc_value = entry.0.acc_value;
 
+        // Check if this fid is already in the list (防御性检查)
+        if entry.1.contains(&fid.to_string()) {
+            println!("Warning: fid '{}' already exists for keyword '{}', skipping add", fid, keyword);
+            // Return current state without adding again
+            let proof = Self::serialize_update_proof(&old_acc_value, &entry.0.acc_value, element, true);
+            let mut root_hash = Vec::new();
+            entry.0.acc_value.serialize(&mut root_hash).unwrap();
+            return (proof, root_hash);
+        }
+
         // 添加到累加器并验证
-        let add_proof = entry.0.add(&element).expect("Failed to add to accumulator");
-        let is_valid = add_proof.verify();
+        let add_result = entry.0.add(&element);
+        
+        let is_valid = match add_result {
+            Ok(proof) => proof.verify(),
+            Err(e) => {
+                eprintln!("Error adding element to accumulator for keyword='{}', fid='{}': {:?}", keyword, fid, e);
+                // Return empty proof on error
+                let proof = Self::serialize_update_proof(&old_acc_value, &old_acc_value, element, false);
+                let mut root_hash = Vec::new();
+                old_acc_value.serialize(&mut root_hash).unwrap();
+                return (proof, root_hash);
+            }
+        };
 
         // 记录 fid
         entry.1.push(fid.to_string());

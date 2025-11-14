@@ -14,8 +14,21 @@ impl ManagerService for Manager {
         let req = request.into_inner();
         println!("Manager received Add request for fid: {}", req.fid);
 
-        // Process each keyword
-        for keyword in &req.keywords {
+        // Deduplicate keywords to avoid adding the same element twice
+        let unique_keywords: HashSet<String> = req.keywords.into_iter().collect();
+        let keyword_count = unique_keywords.len();
+        
+        if keyword_count == 0 {
+            return Ok(Response::new(AddResponse {
+                success: false,
+                message: "No keywords provided".to_string(),
+            }));
+        }
+        
+        println!("  Processing {} unique keyword(s)", keyword_count);
+
+        // Process each unique keyword
+        for keyword in &unique_keywords {
             let (node_name, storager_addr) = self
                 .get_storager_for_keyword(keyword)
                 .ok_or_else(|| Status::internal("No storager available"))?;
@@ -81,8 +94,21 @@ impl ManagerService for Manager {
         let req = request.into_inner();
         println!("Manager received Delete request for fid: {}", req.fid);
 
-        // Process each keyword
-        for keyword in &req.keywords {
+        // Deduplicate keywords to avoid deleting the same element twice
+        let unique_keywords: HashSet<String> = req.keywords.into_iter().collect();
+        let keyword_count = unique_keywords.len();
+        
+        if keyword_count == 0 {
+            return Ok(Response::new(DeleteResponse {
+                success: false,
+                message: "No keywords provided".to_string(),
+            }));
+        }
+        
+        println!("  Processing {} unique keyword(s)", keyword_count);
+
+        // Process each unique keyword
+        for keyword in &unique_keywords {
             let (node_name, storager_addr) = self
                 .get_storager_for_keyword(keyword)
                 .ok_or_else(|| Status::internal("No storager available"))?;
@@ -128,8 +154,15 @@ impl ManagerService for Manager {
         let req = request.into_inner();
         println!("Manager received Update request for fid: {}", req.fid);
 
+        // Deduplicate old and new keywords
+        let unique_old_keywords: HashSet<String> = req.old_keywords.into_iter().collect();
+        let unique_new_keywords: HashSet<String> = req.new_keywords.into_iter().collect();
+        
+        println!("  Deleting {} unique old keyword(s)", unique_old_keywords.len());
+        println!("  Adding {} unique new keyword(s)", unique_new_keywords.len());
+
         // Delete old keywords
-        for keyword in &req.old_keywords {
+        for keyword in &unique_old_keywords {
             let (node_name, storager_addr) = self
                 .get_storager_for_keyword(keyword)
                 .ok_or_else(|| Status::internal("No storager available"))?;
@@ -155,7 +188,7 @@ impl ManagerService for Manager {
         }
 
         // Add new keywords
-        for keyword in &req.new_keywords {
+        for keyword in &unique_new_keywords {
             let (node_name, storager_addr) = self
                 .get_storager_for_keyword(keyword)
                 .ok_or_else(|| Status::internal("No storager available"))?;

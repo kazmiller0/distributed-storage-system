@@ -19,6 +19,7 @@ pub struct Proof {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AdsMode {
     CryptoAccumulator, // 密码学累加器 (BLS12-381)
+    Mpt,               // Merkle Patricia Trie
 }
 
 // Configuration for the distributed storage system

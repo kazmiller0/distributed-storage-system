@@ -7,18 +7,8 @@ members = [
     "crates/common",
     "crates/storager/ads",
     "crates/manager/consistent_hash",
+    "crates/system",
 ]
-
-[package]
-name = "distributed-storage-system"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-common = { path = "crates/common" }
-tokio = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
 
 [workspace.dependencies]
 tokio = { version = "1", features = ["full"] }

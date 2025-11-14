@@ -1,20 +1,16 @@
+//! System-level helper library for the distributed-storage-system workspace.
+//!
+//! 提供整个分布式存储系统的初始化与配置读写工具：
+//! - `initialize` 用于根据参数构造 `SystemConfig`
+//! - `load_config` / `save_config` 用于从文件加载和保存配置
+
 use common::{AdsMode, SystemConfig};
 use std::error::Error;
 
 /// Initialize the distributed storage system
 ///
-/// This function creates and starts:
-/// - One Manager instance
-/// - Multiple Storager instances based on `num_storagers`
-/// - Multiple Client instances based on `num_clients`
-///
-/// # Arguments
-/// * `num_clients` - Number of client instances to create
-/// * `num_storagers` - Number of storager instances to create
-/// * `ads_mode` - Type of authenticated data structure (MerkleTree or PatriciaTrie)
-/// * `manager_addr` - Network address for the Manager
-/// * `storager_addrs` - List of network addresses for Storagers
-/// * `client_addrs` - List of network addresses for Clients (optional)
+/// 当前实现仅构造并返回 `SystemConfig`，不负责真正拉起各个进程。
+/// 可以在测试或实验脚本中复用。
 pub async fn initialize(
     num_clients: usize,
     num_storagers: usize,

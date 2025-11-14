@@ -39,26 +39,26 @@ else
 fi
 
 # 启动 Storager 节点
-echo -e "${YELLOW}[3/4] 启动 Storager 节点...${NC}"
-./target/debug/storager 50052 > logs/storager1.log 2>&1 &
+echo -e "${YELLOW}[3/4] 启动 Storager 节点 (使用 MPT)...${NC}"
+./target/debug/storager 50052 mpt > logs/storager1.log 2>&1 &
 STORAGER1_PID=$!
-echo "  - Storager 1 启动 (PID: $STORAGER1_PID, Port: 50052)"
+echo "  - Storager 1 启动 (PID: $STORAGER1_PID, Port: 50052, ADS: MPT)"
 
-./target/debug/storager 50053 > logs/storager2.log 2>&1 &
+./target/debug/storager 50053 mpt > logs/storager2.log 2>&1 &
 STORAGER2_PID=$!
-echo "  - Storager 2 启动 (PID: $STORAGER2_PID, Port: 50053)"
+echo "  - Storager 2 启动 (PID: $STORAGER2_PID, Port: 50053, ADS: MPT)"
 
-./target/debug/storager 50054 > logs/storager3.log 2>&1 &
+./target/debug/storager 50054 mpt > logs/storager3.log 2>&1 &
 STORAGER3_PID=$!
-echo "  - Storager 3 启动 (PID: $STORAGER3_PID, Port: 50054)"
+echo "  - Storager 3 启动 (PID: $STORAGER3_PID, Port: 50054, ADS: MPT)"
 
 sleep 2
 
 # 启动 Manager
-echo -e "${YELLOW}[4/4] 启动 Manager 节点...${NC}"
-./target/debug/manager > logs/manager.log 2>&1 &
+echo -e "${YELLOW}[4/4] 启动 Manager 节点 (使用 MPT)...${NC}"
+./target/debug/manager --ads-mode mpt > logs/manager.log 2>&1 &
 MANAGER_PID=$!
-echo "  - Manager 启动 (PID: $MANAGER_PID, Port: 50051)"
+echo "  - Manager 启动 (PID: $MANAGER_PID, Port: 50051, ADS: MPT)"
 
 sleep 2
 
